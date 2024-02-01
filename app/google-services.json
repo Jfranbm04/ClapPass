@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "90949114991",
+    "project_id": "clap-pass",
+    "storage_bucket": "clap-pass.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:90949114991:android:12dfa161d735a4d90c819a",
+        "android_client_info": {
+          "package_name": "com.example.clappass"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDgGmQT1jc2EVfAObhvOtMXj1m4EsAx99Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
