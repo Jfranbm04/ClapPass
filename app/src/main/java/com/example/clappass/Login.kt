@@ -230,7 +230,7 @@ fun Password(password: String, onTextChanged: (String) -> Unit) {
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
         colors = TextFieldDefaults.textFieldColors(
-            textColor = Color(0xFF000000),
+            // textColor = Color(0xFF000000),
             containerColor = naranjaLogo,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent
@@ -255,7 +255,7 @@ fun Email(email: String, onTextChanged: (String) -> Unit) {
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
         colors = TextFieldDefaults.textFieldColors(
-            textColor = Color(0xFF000000),
+            // textColor = Color(0xFF000000),
             containerColor = naranjaLogo
         )
     )

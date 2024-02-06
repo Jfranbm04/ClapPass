@@ -1,7 +1,9 @@
 package com.example.clappass
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -36,19 +38,25 @@ import kotlinx.coroutines.delay
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
+import com.example.clappass.ui.theme.azulMolon
 import com.example.clappass.ui.theme.naranjaLogo
 import com.example.clappass.ui.theme.rojoLogo
 import com.google.firebase.Firebase
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.database
 
 // Firebase Realtime Database
@@ -68,7 +76,7 @@ class PantallaPrincipal : ComponentActivity() {
                 Surface(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color.Black),
+                        .background(azulMolon),
 
                     color = MaterialTheme.colorScheme.background,
 
@@ -85,11 +93,12 @@ class PantallaPrincipal : ComponentActivity() {
 fun BackgroundP1() {
 
     var isRecording by remember { mutableStateOf(false) }
+    var username by remember { mutableStateOf("Desconocido") }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black)
+            .background(azulMolon)
     ) {
         Column(
             modifier = Modifier
@@ -105,10 +114,50 @@ fun BackgroundP1() {
                     .clip(shape = MaterialTheme.shapes.medium)
             )
 
-            Spacer(modifier = Modifier.height(100.dp))
+            Spacer(modifier = Modifier.height(10.dp))
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(rojoLogo)
+                    .padding(16.dp)
+                    .align(Alignment.CenterHorizontally)
+            ){
+                Text(
+                    text = "Nombre de Usuario",
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // TextField Nombre Usuario
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(rojoLogo)
+                    .padding(16.dp)
+            ) {
+
+
+                // Espacio para escribir el nombre de usuario
+                TextField(
+                    value = username,
+                    onValueChange = { username = it },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             RecordButton(
                 isRecording = isRecording,
+                username = username,
                 onClick = {
                     isRecording = !isRecording
                 }
@@ -116,11 +165,13 @@ fun BackgroundP1() {
 
 
         }
+
+        val contexto= LocalContext.current
         // Botón ver ranking
         Button(
             onClick = {
-
-
+                val intent = Intent(contexto, Ranking::class.java)
+                contexto.startActivity(intent)
             },
             modifier = Modifier
                 .padding(top = 750.dp)
@@ -143,10 +194,13 @@ fun BackgroundP1() {
             )
         }
     }
+
+
+
 }
 // ----------------------------------------------------------------------------------------
 @Composable
-fun RecordButton(isRecording: Boolean, onClick: () -> Unit) {
+fun RecordButton(isRecording: Boolean, onClick: () -> Unit, username : String) {
     var progresoVisible by remember { mutableStateOf(false) }
     var progreso by remember { mutableStateOf(0f) }
     var showDialog by remember { mutableStateOf(false) }
@@ -256,7 +310,7 @@ fun RecordButton(isRecording: Boolean, onClick: () -> Unit) {
                     .fillMaxWidth()
 
                     .padding(top = 16.dp)
-                    .background(Color.Black)
+                    .background(azulMolon)
                     .wrapContentSize(Alignment.Center)
                     .padding(16.dp)
                     .align(Alignment.CenterHorizontally),
@@ -272,7 +326,7 @@ fun RecordButton(isRecording: Boolean, onClick: () -> Unit) {
                 //databaseReference <- Palmadas
 
 
-                 anadirPuntuacion(puntuacion)
+                 anadirPuntuacion(username, puntuacion)
 
 
             },
@@ -287,7 +341,7 @@ fun RecordButton(isRecording: Boolean, onClick: () -> Unit) {
         ) {
             Text(
                 text = "Añadir puntuación a la base de datos",
-                color = Color.Black,
+                color = Color.White,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
@@ -303,20 +357,67 @@ fun RecordButton(isRecording: Boolean, onClick: () -> Unit) {
 
 // ----------------------------------------------------------------------------
 
-fun anadirPuntuacion(puntuacion: Int) {
-    Log.i("MyApp", "puntiuacion: " + puntuacion);
-    val puntuacionReferencia = databaseReference.child("Palmada05").child("puntuacion")
-    puntuacionReferencia.setValue(puntuacion)
+var contadorPalmadas = 0  // Variable global para mantener el contador de palmadas
+
+fun anadirPuntuacion(username: String, puntuacion: Int) {
+
+    // Obtener el contador actual de palmadas
+    databaseReference.addListenerForSingleValueEvent(object : ValueEventListener {
+        override fun onDataChange(dataSnapshot: DataSnapshot) {
+            val listaPalmadas: MutableList<Palmada> = mutableListOf()
+
+            for (snapshot in dataSnapshot.children) {
+                val nombre = snapshot.child("Usuario").getValue(String::class.java)
+                val puntuacion = snapshot.child("Puntuacion").getValue(Long::class.java)
+
+                if (nombre != null && puntuacion != null) {
+                    val palmada = Palmada(nombre, puntuacion)
+                    listaPalmadas.add(palmada)
+                }
+            }
+
+            // Incrementar el contador de palmadas
+            val contadorPalmadas = listaPalmadas.size + 1
+            // Formatear el contador para que tenga dos dígitos
+            val contadorFormateado = String.format("%02d", contadorPalmadas)
+
+            Log.i("Número de palmadas", "puntuacion: $puntuacion - Palmadas: $contadorFormateado")
+
+            // Crear una nueva referencia con el contador formateado
+            val puntuacionReferencia = databaseReference.child("Palmada$contadorFormateado")
+            puntuacionReferencia.child("Usuario").setValue(username)
+            puntuacionReferencia.child("Puntuacion").setValue(puntuacion)
+        }
+
+        override fun onCancelled(databaseError: DatabaseError) {
+            // Manejar el error según sea necesario
+        }
+    })
 }
 
+
 /*
-fun añadirPuntuacion(palmada01: Palmada) {      // Revisar
-    val key = databaseReference.push().key
-    if(key != null){
-        databaseReference.child(key).setValue(palmada01)
-    }
+fun anadirPuntuacion(username: String, puntuacion: Int) {
+    // Hago que el contador avance sin sobreponer las palmadas previas(asi unicamente se añaden palmadas)
+    val listaPalmadas: ArrayList<Palmada> = ArrayList()
+    /*
+    obtenerDatosDeFirebase(listaPalmadas);
+    contadorPalmadas = listaPalmadas.size
+    */
+
+    // Incrementar el contador de palmadas
+    contadorPalmadas++
+    // Formatear el contador para que tenga dos dígitos
+    val contadorFormateado = String.format("%02d", contadorPalmadas)
+
+    Log.i("Número de palmadas", "puntuacion: $puntuacion - Palmadas: $contadorFormateado")
+
+    val puntuacionReferencia = databaseReference.child("Palmada$contadorFormateado")
+    puntuacionReferencia.child("Usuario").setValue(username)
+    puntuacionReferencia.child("Puntuacion").setValue(puntuacion)
 }
 */
+
 
 
 
