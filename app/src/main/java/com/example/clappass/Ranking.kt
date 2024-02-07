@@ -149,6 +149,7 @@ fun BackgroundP2(listaPalmadas: List<Palmada>) {
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
+                    fontFamily = changoFuente,
                     modifier = Modifier
                         .align(Alignment.TopCenter)
                 )

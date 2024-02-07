@@ -62,11 +62,11 @@ fun LoginScreen() {
 
 @Composable
 fun Header(modifier: Modifier) {
-    logoSpotify()
+    logo()
 }
 
 @Composable
-fun logoSpotify() {
+fun logo() {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -192,7 +192,7 @@ fun LoginButton(email: String, password: String) {
             disabledContainerColor = naranjaLogo
         )
     ) {
-        Text(text = "Acceder", color = Color.Black, fontSize = 16.sp)
+        Text(text = "Acceder", color = Color.White, fontSize = 25.sp, fontFamily = changoFuente,)
     }
 }
 
@@ -264,12 +264,16 @@ fun Email(email: String, onTextChanged: (String) -> Unit) {
 @Composable
 fun iniciaSesion() {
     Text(
-        text = "Inicia sesión en Clap Pass",
+        text = "INICIAR SESIÓN \n EN CLAP PASS",
+
         modifier = Modifier
             .background(color = Color.Black)
             .border(1.dp, color = Color.Black)
+
             .fillMaxWidth(),
-        fontSize = 28.sp,
+        fontSize = 30.sp,
+        fontFamily = changoFuente,
+        textAlign = TextAlign.Center,
         fontWeight = FontWeight.ExtraBold,
         color = Color.White
     )
@@ -311,6 +315,7 @@ fun continuaCon(app: String) {
             text = "Continuar con $app",
             color = Color.White,
             fontSize = 16.sp,
+
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
             modifier = Modifier

@@ -1,5 +1,6 @@
 package com.example.clappass
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -45,6 +46,8 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
@@ -60,12 +63,13 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.database
 
 // Firebase Realtime Database
-// val database = Firebase.database
-// val palmadaRef = database.getReference("Palmadas")
-
-//val databaseReference: DatabaseReference = FirebaseDatabase.getInstance().reference.child("Palmadas")
 val databaseReference = Firebase.database("https://clap-pass-default-rtdb.europe-west1.firebasedatabase.app/")
     .getReference("Palmadas")
+
+// Importo la fuente y la almaceno en una variable
+val changoFuente = FontFamily(
+    Font(R.font.chango)
+)
 
 class PantallaPrincipal : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -88,6 +92,11 @@ class PantallaPrincipal : ComponentActivity() {
         }
     }
 }
+// Método para añadir toast
+fun showToast(context: Context, mensaje: String, duracion: Int = Toast.LENGTH_SHORT) {
+    Toast.makeText(context, mensaje, duracion).show()
+}
+
 @Preview(showBackground = true)
 @Composable
 fun BackgroundP1() {
@@ -123,11 +132,12 @@ fun BackgroundP1() {
                     .align(Alignment.CenterHorizontally)
             ){
                 Text(
-                    text = "Nombre de Usuario",
+                    text = "NOMBRE DE USUARIO",
                     color = Color.White,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
+                    fontFamily = changoFuente,
                     modifier = Modifier
                         .align(Alignment.TopCenter)
                 )
@@ -142,7 +152,6 @@ fun BackgroundP1() {
                     .padding(16.dp)
             ) {
 
-
                 // Espacio para escribir el nombre de usuario
                 TextField(
                     value = username,
@@ -150,6 +159,8 @@ fun BackgroundP1() {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(8.dp)
+                        .background(color = Color.Transparent),
+
                 )
             }
 
@@ -168,7 +179,9 @@ fun BackgroundP1() {
 
         val contexto= LocalContext.current
         // Botón ver ranking
+
         Button(
+
             onClick = {
                 val intent = Intent(contexto, Ranking::class.java)
                 contexto.startActivity(intent)
@@ -187,7 +200,8 @@ fun BackgroundP1() {
             Text(
                 text = "VER RANKING",
                 color = Color.White,
-                fontSize = 40.sp,
+                fontSize = 30.sp,
+                fontFamily = changoFuente,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
@@ -315,19 +329,18 @@ fun RecordButton(isRecording: Boolean, onClick: () -> Unit, username : String) {
                     .padding(16.dp)
                     .align(Alignment.CenterHorizontally),
                 textAlign = TextAlign.Center,
+                fontFamily = changoFuente,
                 fontSize = 20.sp
             )
         }
 
         // Botón añadir puntuación
+        val contexto= LocalContext.current
+
         Button(
             onClick = {
-                 //val nuevaPuntuacionRef = palmadaRef.push()
-                //databaseReference <- Palmadas
-
-
-                 anadirPuntuacion(username, puntuacion)
-
+                anadirPuntuacion(username, puntuacion)
+                showToast(contexto, "Puntuación añadida.");
 
             },
             modifier = Modifier
@@ -396,27 +409,6 @@ fun anadirPuntuacion(username: String, puntuacion: Int) {
 }
 
 
-/*
-fun anadirPuntuacion(username: String, puntuacion: Int) {
-    // Hago que el contador avance sin sobreponer las palmadas previas(asi unicamente se añaden palmadas)
-    val listaPalmadas: ArrayList<Palmada> = ArrayList()
-    /*
-    obtenerDatosDeFirebase(listaPalmadas);
-    contadorPalmadas = listaPalmadas.size
-    */
-
-    // Incrementar el contador de palmadas
-    contadorPalmadas++
-    // Formatear el contador para que tenga dos dígitos
-    val contadorFormateado = String.format("%02d", contadorPalmadas)
-
-    Log.i("Número de palmadas", "puntuacion: $puntuacion - Palmadas: $contadorFormateado")
-
-    val puntuacionReferencia = databaseReference.child("Palmada$contadorFormateado")
-    puntuacionReferencia.child("Usuario").setValue(username)
-    puntuacionReferencia.child("Puntuacion").setValue(puntuacion)
-}
-*/
 
 
 
